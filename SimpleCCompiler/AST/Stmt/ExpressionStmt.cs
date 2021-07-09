@@ -15,9 +15,5 @@ namespace SimpleCCompiler.AST.Stmt
         {
             return Parent.LookupSymbolTable(name);
         }
-        public override IList<IInstruction> EmitIR()
-        {
-            return new List<IInstruction>(0);
-        }
     }
 }

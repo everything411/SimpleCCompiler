@@ -9,9 +9,5 @@ namespace SimpleCCompiler.AST.Stmt
 {
     public class EmptyStmt : Stmt
     {
-        public override IList<IInstruction> EmitIR()
-        {
-            return new List<IInstruction>(0);
-        }
     }
 }

@@ -14,9 +14,5 @@ namespace SimpleCCompiler.AST.Stmt
         {
             ParentIterationStmt = parent.GetIterationStmtOrException();
         }
-        public override IList<IInstruction> EmitIR()
-        {
-            return new List<IInstruction>(0);
-        }
     }
 }

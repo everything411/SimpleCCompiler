@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace SimpleCCompiler.IR.Instrunction
 {
-    public class Instrution : IInstruction
+    public class Instruction : IInstruction
     {
-
+        public Operation Operation { get; set; }
+        public Variable Argument1 { get; set; }
+        public Variable Argument2 { get; set; }
+        public Variable Result { get; set; }
     }
 }

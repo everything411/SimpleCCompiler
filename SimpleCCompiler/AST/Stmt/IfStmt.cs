@@ -11,13 +11,11 @@ namespace SimpleCCompiler.AST.Stmt
     {
         public IExpr ConditionalExpr { get; set; }
         public IStmt BodyStmt { get; set; }
+        public LabelInstruction IfTrueLabel { get; set; } = new();
+        public LabelInstruction IfFalseLabel { get; set; } = new();
         public override SymbolTableItem LookupSymbolTable(string name)
         {
             return Parent.LookupSymbolTable(name);
-        }
-        public override IList<IInstruction> EmitIR()
-        {
-            return new List<IInstruction>(0);
         }
     }
 }

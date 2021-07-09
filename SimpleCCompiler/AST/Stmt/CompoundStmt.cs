@@ -47,9 +47,15 @@ namespace SimpleCCompiler.AST.Stmt
                     throw new SemanticErrorException($"Unexpected token {decl}, expected VarDecl");
             }
         }
-        public override IList<IInstruction> EmitIR()
+        public override IEnumerable<SymbolTableItem> CollectSymbolTableItems()
         {
-            return new List<IInstruction>(0);
+            List<SymbolTableItem> symbolTableItems = new();
+            symbolTableItems.AddRange(SymbolTable.Symbols.Values);
+            foreach (var stmt in Stmts)
+            {
+                symbolTableItems.AddRange(stmt.CollectSymbolTableItems());
+            }
+            return symbolTableItems;
         }
     }
 }

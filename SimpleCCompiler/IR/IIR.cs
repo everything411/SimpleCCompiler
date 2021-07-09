@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleCCompiler.CodeGeneration
+namespace SimpleCCompiler.IR
 {
-    public interface ICodeGenerator
+    public interface IIR
     {
     }
 }

@@ -16,7 +16,11 @@ namespace SimpleCCompiler.AST.Stmt
         public IExpr ConditionalExpr { get; set; } 
         public IExpr EndExpr { get; set; }
         public IStmt LoopBodyStmt { get; set; }
-        public SymbolTable SymbolTable = new();
+        public SymbolTable SymbolTable { get; set; } = new();
+        // for IR generation
+        public LabelInstruction StartLabel { get; set; } = new();
+        public LabelInstruction EndExprLabel { get; set; } = new();
+        public LabelInstruction EndLabel { get; set; } = new();
         public override SymbolTableItem LookupSymbolTable(string name)
         {
             if (SymbolTable.TryGetValue(name, out SymbolTableItem item))
@@ -48,9 +52,15 @@ namespace SimpleCCompiler.AST.Stmt
                     throw new SemanticErrorException($"Unexpected token {decl}, expected VarDecl");
             }
         }
-        public override IList<IInstruction> EmitIR()
+        public override IEnumerable<SymbolTableItem> CollectSymbolTableItems()
         {
-            return new List<IInstruction>(0);
+            List<SymbolTableItem> symbolTableItems = new();
+            symbolTableItems.AddRange(SymbolTable.Symbols.Values);
+            if (LoopBodyStmt is CompoundStmt)
+            {
+                symbolTableItems.AddRange(LoopBodyStmt.CollectSymbolTableItems());
+            }
+            return symbolTableItems;
         }
     }
 }

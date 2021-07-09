@@ -699,10 +699,35 @@ namespace SimpleCCompiler.Parser
         public override void EnterArgumentExpressionList([NotNull] CParser.ArgumentExpressionListContext context)
         {
             base.EnterArgumentExpressionList(context);
+            var parent = NodeStack.Peek();
+            /*
+            if (parent is ArgumentExprListExpr)
+            {
+                return;
+            }
+            */
+            var expr = new ArgumentExprListExpr();
+            expr.Parent = parent;
+            // AddExpressionToParent(parent, expr);
+            NodeStack.Push(expr);
         }
         public override void ExitArgumentExpressionList([NotNull] CParser.ArgumentExpressionListContext context)
         {
             base.ExitArgumentExpressionList(context);
+            var node = NodeStack.Pop() as ArgumentExprListExpr;
+            var parent = NodeStack.Peek();
+            // TODO: this may be buggy
+            switch (parent)
+            {
+                case ArgumentExprListExpr e:
+                    e.ArgumentExprList.AddRange(node.ArgumentExprList);
+                    break;
+                case CallExpr f:
+                    f.ArgumentExprList = node.ArgumentExprList;
+                    break;
+                default:
+                    throw new SyntaxErrorException($"Unexpected {parent}, ArgumentExprListExpr or CallExpr expected");
+            }
         }
 
         // PrimaryExpression
@@ -872,6 +897,24 @@ namespace SimpleCCompiler.Parser
                         throw new Exception("What?");
                     }
                     break;
+                case ArrayVarDecl arrayVarDecl:
+                    child.Parent = arrayVarDecl;
+                    arrayVarDecl.Type = arrayVarDecl.Type switch
+                    {
+                        AST.Type.Int => AST.Type.IntArray,
+                        AST.Type.Char => AST.Type.CharArray,
+                        _ => throw new Exception("What?")
+                    };
+                    if (arrayVarDecl.Size == 0 && child is IntegerLiteral)
+                    {
+                        arrayVarDecl.Size = (child as IntegerLiteral).Value;
+                        Console.WriteLine($"Array Size {arrayVarDecl.Size}");
+                    }
+                    else
+                    {
+                        throw new Exception("What?");
+                    }
+                    break;
                 case VarDecl varDecl:
                     child.Parent = varDecl;
                     if (varDecl.InitializerExpr is null)
@@ -883,6 +926,10 @@ namespace SimpleCCompiler.Parser
                         throw new Exception("What?");
                     }
                     break;
+                case ArgumentExprListExpr argumentExprList:
+                    child.Parent = argumentExprList.Parent;
+                    argumentExprList.ArgumentExprList.Add(child);
+                    break; 
                 default:
                     throw new SyntaxErrorException($"Unexpected parent node {parent}");
             }

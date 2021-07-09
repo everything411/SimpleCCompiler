@@ -3,6 +3,8 @@ using Antlr4.Runtime.Tree;
 using SimpleCCompiler.Parser;
 using System;
 using System.Text.Json;
+using SimpleCCompiler.IR;
+using System.Collections.Generic;
 
 namespace SimpleCCompiler
 {
@@ -12,7 +14,7 @@ namespace SimpleCCompiler
         {
             if (args.Length != 1)
             {
-                Console.WriteLine("usage: ccompiler input");
+                Console.WriteLine("usage: naivecc input");
                 return;
             }
             Console.WriteLine("Naive C Compiler by everything411. Too young, too simple.");
@@ -54,11 +56,24 @@ namespace SimpleCCompiler
                 Environment.Exit(1);
             }
             var astRoot = listener.GetASTRoot();
-            Console.WriteLine(JsonSerializer.Serialize(astRoot, new JsonSerializerOptions { WriteIndented = true}));
+            // Console.WriteLine(JsonSerializer.Serialize(astRoot, new JsonSerializerOptions { WriteIndented = true}));
             Console.WriteLine("Complete"); 
             Console.WriteLine("Run IR generation");
+            List<IIR> irs = null;
+            try
+            {
+                irs = IRGenerator.GenerateIRForTranslationUnit(astRoot);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("=== Exception ===");
+                Console.WriteLine(e);
+                Environment.Exit(1);
+            }
             Console.WriteLine("Complete");
             Console.WriteLine("Run code generation");
+            var codes = CodeGeneration.CodeGenerator.GenerateAssembly(irs);
+            Console.WriteLine(codes);
             Console.WriteLine("Complete");
             //Console.WriteLine("Press Enter to exit...");
             //Console.ReadLine();

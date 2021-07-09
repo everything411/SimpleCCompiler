@@ -1,15 +1,13 @@
-﻿using Antlr4.Runtime.Tree;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SimpleCCompiler.IR;
 
 namespace SimpleCCompiler.AST.Expr
 {
     public class Expr : IExpr
     {
         public INode Parent { get; set; }
+        public Variable ResultVariable { get; set; }
 
         public void AddDeclaration(IDecl decl)
         {
@@ -19,6 +17,10 @@ namespace SimpleCCompiler.AST.Expr
         public virtual SymbolTableItem LookupSymbolTable(string name)
         {
             return Parent.LookupSymbolTable(name);
+        }
+        public virtual IEnumerable<SymbolTableItem> CollectSymbolTableItems()
+        {
+            throw new NotImplementedException();
         }
     }
 }

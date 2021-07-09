@@ -1,10 +1,11 @@
 ﻿using SimpleCCompiler.IR.Instrunction;
 using System;
 using System.Collections.Generic;
+using SimpleCCompiler.IR;
 
 namespace SimpleCCompiler.AST.Decl
 {
-    public class TranslationUnitDecl : Decl, IR.IIRGenerator
+    public class TranslationUnitDecl : Decl
     {
         public SymbolTable SymbolTable { get; set; } = new();
         // for json serialize change to ValueDecl
@@ -52,11 +53,6 @@ namespace SimpleCCompiler.AST.Decl
                 default:
                     throw new SemanticErrorException($"Unexpected token {decl}, expected VarDecl");
             }
-        }
-
-        public IList<IInstruction> EmitIR()
-        {
-            throw new NotImplementedException();
         }
     }
 }

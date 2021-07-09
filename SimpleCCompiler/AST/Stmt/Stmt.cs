@@ -1,20 +1,11 @@
-﻿using Antlr4.Runtime.Tree;
-using SimpleCCompiler.IR;
-using SimpleCCompiler.IR.Instrunction;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SimpleCCompiler.AST.Stmt
 {
     public class Stmt : IStmt
     {
-        public INode Parent
-        {
-            get; set;
-        }
+        public INode Parent{ get; set; }
 
         public ForStmt GetIterationStmtOrException()
         {
@@ -33,11 +24,6 @@ namespace SimpleCCompiler.AST.Stmt
             }
         }
 
-        public virtual IList<IInstruction> EmitIR()
-        {
-            throw new NotImplementedException();
-        }
-
         public virtual SymbolTableItem LookupSymbolTable(string name)
         {
             throw new NotImplementedException();
@@ -46,6 +32,11 @@ namespace SimpleCCompiler.AST.Stmt
         public virtual void AddDeclaration(IDecl decl)
         {
             throw new NotImplementedException();
+        }
+
+        public virtual IEnumerable<SymbolTableItem> CollectSymbolTableItems()
+        {
+            return new List<SymbolTableItem>(0);
         }
     }
 }
