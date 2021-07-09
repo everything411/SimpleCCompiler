@@ -10,7 +10,5 @@ namespace SimpleCCompiler.IR
     {
         public List<Function> FunctionList { get; set; } // default == null
         public Dictionary<Guid, Variable> VariableDictionary { get; set; } = new();
-        public Dictionary<Guid, ArrayVariable> ArrayDictionary { get; set; } = new();
-        // public 
     }
 }

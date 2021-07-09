@@ -14,6 +14,18 @@ namespace SimpleCCompiler.IR.Instrunction
             Argument1 = argument1;
             Result = result;
         }
+        public override string EmitAssembly()
+        {
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            stringBuilder.AppendLine($"inc dword ptr [ebp + {Argument1.OffsetEBP}]");
+            return stringBuilder.ToString();
+        }
+        public override string ToString()
+        {
+            return $"(IncInstruction, {Argument1}, , {Result})";
+        }
     }
     public class DecInstruction : Instruction
     {
@@ -22,6 +34,18 @@ namespace SimpleCCompiler.IR.Instrunction
             Operation = Operation.Dec;
             Argument1 = argument1;
             Result = result;
+        }
+        public override string EmitAssembly()
+        {
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            stringBuilder.AppendLine($"dec dword ptr [ebp + {Argument1.OffsetEBP}]");
+            return stringBuilder.ToString();
+        }
+        public override string ToString()
+        {
+            return $"(DecInstruction, {Argument1}, , {Result})";
         }
     }
 }

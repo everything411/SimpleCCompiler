@@ -96,10 +96,47 @@ namespace SimpleCCompiler.Parser
                                 break;
                             case CompoundStmt compoundStmt:
                                 compoundStmt.AddDeclaration(decl);
+                                if (decl.InitializerExpr is not null)
+                                {
+                                    var es = new ExpressionStmt
+                                    {
+                                        Parent = compoundStmt
+                                    };
+                                    var e = new BinaryOperatorExpr
+                                    {
+                                        Operator = BinaryOperator.Assignment,
+                                        Parent = es,
+                                        RightExpression = decl.InitializerExpr
+                                    };
+                                    es.Expr = e;
+                                    var d = new DeclRefExpr
+                                    {
+                                        Parent = e,
+                                        Ref = compoundStmt.LookupSymbolTable(decl.Name)
+                                    };
+                                    e.LeftExpression = d;
+                                    compoundStmt.Stmts.Add(es);
+                                }
                                 break;
                             case ForStmt forStmt:
                                 forStmt.AddDeclaration(decl);
-                                forStmt.InitExpr = new EmptyExpr();
+                                if (decl.InitializerExpr is not null)
+                                {
+                                    var e = new BinaryOperatorExpr
+                                    {
+                                        Operator = BinaryOperator.Assignment,
+                                        Parent = forStmt,
+                                        RightExpression = decl.InitializerExpr
+                                    };
+                                    var d = new DeclRefExpr
+                                    {
+                                        Parent = e,
+                                        Ref = forStmt.LookupSymbolTable(decl.Name)
+                                    };
+                                    e.LeftExpression = d;
+                                    forStmt.InitExpr = e;
+                                }
+                                
                                 break;
                             default:
                                 throw new SyntaxErrorException($"Unexpected token {parent}, expected TranslationUnitDecl, ForStmt or CompoundStmt");
@@ -169,7 +206,38 @@ namespace SimpleCCompiler.Parser
                         functionDecl.Parent.AddDeclaration(functionDecl);
                         break;
                     default:
-                        throw new SyntaxErrorException($"Unexpected token {node}, expected NamedDecl");
+                        throw new SyntaxErrorException($"Unexpected token {node}, expected VarDecl or FunctionDecl");
+                }
+            }
+            // array or func
+            else
+            {
+                // array, change type
+                if (context.LeftBracket() is not null)
+                {
+                    // Console.WriteLine("array");
+                    var node = NodeStack.Pop();
+                    switch (node)
+                    {
+                        case VarDecl valueDecl:
+                            ArrayVarDecl arrayVarDecl = new();
+
+                            arrayVarDecl.InitializerExpr = valueDecl.InitializerExpr;
+                            arrayVarDecl.Name = valueDecl.Name;
+                            arrayVarDecl.Parent = valueDecl.Parent;
+                            
+                            arrayVarDecl.Type = AST.Type.IntArray;
+                            var parent = NodeStack.Peek();
+                            if (parent is VarDeclList)
+                            {
+                                (parent as VarDeclList).VarDecls.Remove(valueDecl);
+                                (parent as VarDeclList).VarDecls.Add(arrayVarDecl);
+                            }
+                            NodeStack.Push(arrayVarDecl);
+                            break;
+                        default:
+                            throw new SyntaxErrorException($"Unexpected token {node}, expected VarDecl");
+                    }
                 }
             }
 
@@ -290,7 +358,14 @@ namespace SimpleCCompiler.Parser
                             parentForStmt.LoopBodyStmt = compound;
                             break;
                         case IfStmt parentIfStmt:
-                            parentIfStmt.BodyStmt = compound;
+                            if (parentIfStmt.IfTrueBody is null)
+                            {
+                                parentIfStmt.IfTrueBody = compound;
+                            }
+                            else
+                            {
+                                parentIfStmt.IfFalseBody = compound;
+                            }
                             break;
                         case CompoundStmt parentCompoundStmt:
                             parentCompoundStmt.Stmts.Add(compound);
@@ -346,7 +421,14 @@ namespace SimpleCCompiler.Parser
                             parentFor.LoopBodyStmt = forStmt;
                             break;
                         case IfStmt parentIfStmt:
-                            parentIfStmt.BodyStmt = forStmt;
+                            if (parentIfStmt.IfTrueBody is null)
+                            {
+                                parentIfStmt.IfTrueBody = forStmt;
+                            }
+                            else
+                            {
+                                parentIfStmt.IfFalseBody = forStmt;
+                            }
                             break;
                         case CompoundStmt parentCompoundStmt:
                             parentCompoundStmt.Stmts.Add(forStmt);
@@ -356,7 +438,7 @@ namespace SimpleCCompiler.Parser
                     }
                     break;
                 default:
-                    throw new SyntaxErrorException($"Unexpected token {node}, expected CompoundStmt");
+                    throw new SyntaxErrorException($"Unexpected token {node}, expected ForStmt");
             }
         }
         public override void EnterJumpStatement([NotNull] CParser.JumpStatementContext context)
@@ -399,7 +481,59 @@ namespace SimpleCCompiler.Parser
         public override void ExitJumpStatement([NotNull] CParser.JumpStatementContext context)
         {
             base.ExitJumpStatement(context);
-            NodeStack.Pop();
+            var node = NodeStack.Pop();
+            var parent = NodeStack.Peek();
+            switch (node)
+            {
+                case ReturnStmt rstmt:
+                    switch (parent)
+                    {
+                        case ForStmt parentFor:
+                            parentFor.LoopBodyStmt = rstmt;
+                            break;
+                        case IfStmt parentIfStmt:
+                            if (parentIfStmt.IfTrueBody is null)
+                            {
+                                parentIfStmt.IfTrueBody = rstmt;
+                            }
+                            else
+                            {
+                                parentIfStmt.IfFalseBody = rstmt;
+                            }
+                            break;
+                        case CompoundStmt parentCompoundStmt:
+                            parentCompoundStmt.Stmts.Add(rstmt);
+                            break;
+                        default:
+                            throw new SyntaxErrorException($"Unexpected token {parent}, expected ForStmt, IfStmt or CompoundStmt");
+                    }
+                    break;
+                case BreakStmt bstmt:
+                    switch (parent)
+                    {
+                        case ForStmt parentFor:
+                            parentFor.LoopBodyStmt = bstmt;
+                            break;
+                        case IfStmt parentIfStmt:
+                            if (parentIfStmt.IfTrueBody is null)
+                            {
+                                parentIfStmt.IfTrueBody = bstmt;
+                            }
+                            else
+                            {
+                                parentIfStmt.IfFalseBody = bstmt;
+                            }
+                            break;
+                        case CompoundStmt parentCompoundStmt:
+                            parentCompoundStmt.Stmts.Add(bstmt);
+                            break;
+                        default:
+                            throw new SyntaxErrorException($"Unexpected token {parent}, expected ForStmt, IfStmt or CompoundStmt");
+                    }
+                    break;
+                default:
+                    throw new SyntaxErrorException($"Unexpected token {node}, expected CompoundStmt");
+            }
         }
         public override void EnterSelectionStatement([NotNull] CParser.SelectionStatementContext context)
         {
@@ -439,7 +573,15 @@ namespace SimpleCCompiler.Parser
                             parentForStmt.LoopBodyStmt = ifStmt;
                             break;
                         case IfStmt parentIfStmt:
-                            parentIfStmt.BodyStmt = ifStmt;
+                            if (parentIfStmt.IfTrueBody is null)
+                            {
+                                parentIfStmt.IfTrueBody = ifStmt;
+                            }
+                            else
+                            {
+                                
+                                parentIfStmt.IfFalseBody = ifStmt;
+                            }
                             break;
                         case CompoundStmt parentCompoundStmt:
                             parentCompoundStmt.Stmts.Add(ifStmt);
@@ -872,19 +1014,30 @@ namespace SimpleCCompiler.Parser
                     {
                         ifStmt.ConditionalExpr = child;
                     }
-                    else if(ifStmt.BodyStmt is null)
+                    else if(ifStmt.IfTrueBody is null)
                     {
                         ExpressionStmt exprStmt = new()
                         {
                             Parent = ifStmt,
                             Expr = child
                         };
-                        ifStmt.BodyStmt = exprStmt;
+                        ifStmt.IfTrueBody = exprStmt;
                     }
+                    else
+                    {
+                        ExpressionStmt exprStmt = new()
+                        {
+                            Parent = ifStmt,
+                            Expr = child
+                        };
+                        ifStmt.IfFalseBody = exprStmt;
+                    }
+                    /*
                     else
                     {
                         throw new Exception("What?");
                     }
+                    */
                     break;
                 case ReturnStmt returnStmt:
                     child.Parent = returnStmt;
@@ -899,16 +1052,18 @@ namespace SimpleCCompiler.Parser
                     break;
                 case ArrayVarDecl arrayVarDecl:
                     child.Parent = arrayVarDecl;
+                    /*
                     arrayVarDecl.Type = arrayVarDecl.Type switch
                     {
                         AST.Type.Int => AST.Type.IntArray,
                         AST.Type.Char => AST.Type.CharArray,
                         _ => throw new Exception("What?")
                     };
+                    */
                     if (arrayVarDecl.Size == 0 && child is IntegerLiteral)
                     {
                         arrayVarDecl.Size = (child as IntegerLiteral).Value;
-                        Console.WriteLine($"Array Size {arrayVarDecl.Size}");
+                        // Console.WriteLine($"Array Size {arrayVarDecl.Size}");
                     }
                     else
                     {

@@ -12,5 +12,10 @@ namespace SimpleCCompiler.IR.Instrunction
         public Variable Argument1 { get; set; }
         public Variable Argument2 { get; set; }
         public Variable Result { get; set; }
+
+        public virtual string EmitAssembly()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

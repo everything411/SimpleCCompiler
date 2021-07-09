@@ -11,10 +11,24 @@ namespace SimpleCCompiler.IR.Instrunction
     }
     public class LoadArrayInstruction : LoadInstruction
     {
-        public LoadArrayInstruction(Variable arg1, Variable result)
+        public LoadArrayInstruction(ArrayIndexVariable arg1, Variable result)
         {
             Result = result;
             Argument1 = arg1;
+        }
+        public override string EmitAssembly()
+        {
+            var arrayIndexVar = Argument1 as ArrayIndexVariable;
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($"mov ecx, [ebp + {arrayIndexVar.Index.OffsetEBP}]");
+            stringBuilder.AppendLine($"lea eax, [ebp + {arrayIndexVar.OffsetEBP} + ecx * 4]");
+            stringBuilder.AppendLine($"mov ecx, [eax]");
+            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], ecx");
+            return stringBuilder.ToString();
+        }
+        public override string ToString()
+        {
+            return $"(LoadArrayInstruction, {Argument1}, , {Result})";
         }
     }
     public class LoadStringLiternalInstruction : LoadInstruction
@@ -25,6 +39,14 @@ namespace SimpleCCompiler.IR.Instrunction
             Result = result;
             Literal = s;
         }
+        public override string EmitAssembly()
+        {
+            return $"mov dword ptr [ebp + {Result.OffsetEBP}], offset {Literal.LiteralName}";
+        }
+        public override string ToString()
+        {
+            return $"(LoadStringLiternalInstruction, {Literal.LiteralName}, , {Result})";
+        }
     }
     public class LoadIntLiternalInstruction : LoadInstruction
     {
@@ -33,6 +55,14 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Result = result;
             Literal = s;
+        }
+        public override string EmitAssembly()
+        {
+            return $"mov dword ptr [ebp + {Result.OffsetEBP}], {Literal}";
+        }
+        public override string ToString()
+        {
+            return $"(LoadIntLiternalInstruction, {Literal}, , {Result})";
         }
     }
 }

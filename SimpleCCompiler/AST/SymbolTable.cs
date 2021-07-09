@@ -14,6 +14,18 @@ namespace SimpleCCompiler
             ParameterNumber = n;
         }
     }
+    public class ArraySymbolTableItem : SymbolTableItem
+    {
+        public int ArraySize { get; set; }
+        public ArraySymbolTableItem(AST.Type type, string name, int size) : base(type, name)
+        {
+            ArraySize = size;
+        }
+        public override string ToString()
+        {
+            return $"{base.ToString()}:{ArraySize}";
+        }
+    }
     public class SymbolTableItem
     {
         public Guid Guid { get; } = Guid.NewGuid();
@@ -52,6 +64,14 @@ namespace SimpleCCompiler
                 throw new SemanticErrorException($"Symbol {name} redefined");
             }
             Symbols.Add(name, new ParameterSymbolTableItem(type, name, n));
+        }
+        public void AddArrayOrException(string name, AST.Type type, int n)
+        {
+            if (Symbols.GetValueOrDefault(name) is not null)
+            {
+                throw new SemanticErrorException($"Symbol {name} redefined");
+            }
+            Symbols.Add(name, new ArraySymbolTableItem(type, name, n));
         }
         public bool TryGetValue(string name, out SymbolTableItem symbolTableItem)
         {

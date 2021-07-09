@@ -15,6 +15,7 @@ namespace SimpleCCompiler.IR.Instrunction
             Argument2 = argument2;
             Result = result;
         }
+
     }
     public class AddInstruction : ArithmeticalInstruction
     {
@@ -23,12 +24,18 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Add;
         }
-        public override string ToString()
+        public override string EmitAssembly()
         {
             StringBuilder stringBuilder = new();
-            // argument1;
-            stringBuilder.Append("mov ");
+            stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.AppendLine($"mov ecx, [ebp + {Argument2.OffsetEBP}]");
+            stringBuilder.AppendLine($"add eax, ecx");
+            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
             return stringBuilder.ToString();
+        }
+        public override string ToString()
+        {
+            return $"(AddInstruction, {Argument1}, {Argument2}, {Result})";
         }
     }
     public class SubInstruction : ArithmeticalInstruction
@@ -37,6 +44,19 @@ namespace SimpleCCompiler.IR.Instrunction
             : base(argument1, argument2, result)
         {
             Operation = Operation.Sub;
+        }
+        public override string EmitAssembly()
+        {
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.AppendLine($"mov ecx, [ebp + {Argument2.OffsetEBP}]");
+            stringBuilder.AppendLine($"sub eax, ecx");
+            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            return stringBuilder.ToString();
+        }
+        public override string ToString()
+        {
+            return $"(SubInstruction, {Argument1}, {Argument2}, {Result})";
         }
     }
     public class CmpInstruction : ArithmeticalInstruction
@@ -48,6 +68,18 @@ namespace SimpleCCompiler.IR.Instrunction
             BinaryOperator = o;
             Operation = Operation.Cmp;
         }
+        public override string EmitAssembly()
+        {
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.AppendLine($"mov ecx, [ebp + {Argument2.OffsetEBP}]");
+            stringBuilder.AppendLine($"cmp eax, ecx");
+            return stringBuilder.ToString();
+        }
+        public override string ToString()
+        {
+            return $"(CmpInstruction, {Argument1}, {Argument2}, {Result})";
+        }
     }
     public class MulInstruction : ArithmeticalInstruction
     {
@@ -55,6 +87,19 @@ namespace SimpleCCompiler.IR.Instrunction
             : base(argument1, argument2, result)
         {
             Operation = Operation.Mul;
+        }
+        public override string EmitAssembly()
+        {
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.AppendLine($"mov ecx, [ebp + {Argument2.OffsetEBP}]");
+            stringBuilder.AppendLine($"imul eax, ecx");
+            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            return stringBuilder.ToString();
+        }
+        public override string ToString()
+        {
+            return $"(MulInstruction, {Argument1}, {Argument2}, {Result})";
         }
     }
     public class DivInstruction : ArithmeticalInstruction
@@ -64,6 +109,19 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Div;
         }
+        public override string EmitAssembly()
+        {
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.AppendLine($"cdq");
+            stringBuilder.AppendLine($"div word ptr [ebp + {Argument2.OffsetEBP}]");
+            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            return stringBuilder.ToString();
+        }
+        public override string ToString()
+        {
+            return $"(DivInstruction, {Argument1}, {Argument2}, {Result})";
+        }
     }
     public class ModInstruction : ArithmeticalInstruction
     {
@@ -71,6 +129,19 @@ namespace SimpleCCompiler.IR.Instrunction
             : base(argument1, argument2, result)
         {
             Operation = Operation.Mod;
+        }
+        public override string EmitAssembly()
+        {
+            StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.AppendLine($"cdq");
+            stringBuilder.AppendLine($"div word ptr [ebp + {Argument2.OffsetEBP}]");
+            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], edx");
+            return stringBuilder.ToString();
+        }
+        public override string ToString()
+        {
+            return $"(ModInstruction, {Argument1}, {Argument2}, {Result})";
         }
     }
 }

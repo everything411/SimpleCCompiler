@@ -5,12 +5,13 @@ using SimpleCCompiler.AST;
 using SimpleCCompiler.IR.Instrunction;
 using System.Collections.Generic;
 using System;
+using System.Text;
 
 namespace SimpleCCompiler.IR
 {
     public static class IRGenerator
     {
-        public static List<IIR> GenerateIRForTranslationUnit(TranslationUnitDecl translationUnitDecl)
+        public static Module GenerateIRForTranslationUnit(TranslationUnitDecl translationUnitDecl)
         {
             
             Module module = new();
@@ -23,7 +24,6 @@ namespace SimpleCCompiler.IR
             foreach (var functionDecl in translationUnitDecl.FunctionDeclList)
             {
                 Function function = new();
-                List<IIR> irList = function.IRs;
                 function.Name = functionDecl.Name;
                 function.Type = functionDecl.Type switch
                 {
@@ -43,8 +43,8 @@ namespace SimpleCCompiler.IR
                     v.OffsetEBP = (argItem.ParameterNumber + 1) * 4;
                     function.IRSymbolTable.VariableDictionary.Add(v.Guid, v);
                 }
+                // auto variables
                 var symbols = CollectSymbolsFromFunction(functionDecl);
-                // Console.WriteLine(symbols);
                 foreach (var symbol in symbols)
                 {
                     switch (symbol.Type)
@@ -67,6 +67,7 @@ namespace SimpleCCompiler.IR
                             ArrayVariable av = new();
                             av.Name = symbol.Name;
                             av.Guid = symbol.Guid;
+                            av.Size = (symbol as ArraySymbolTableItem).ArraySize;
                             av.Type = symbol.Type switch
                             {
                                 AST.Type.IntArray => Type.I32Array,
@@ -78,49 +79,30 @@ namespace SimpleCCompiler.IR
                         default:
                             throw new InternalErrorException($"Unknown type {symbol.Type}");
                     }
-                    /*
-                    Variable v = new();
-                    v.Name = symbol.Name;
-                    v.Type = symbol.Type switch
-                    {
-                        AST.Type.Int => Type.I32,
-                        AST.Type.Char => Type.I8,
-                        AST.Type.IntArray => Type.I32Array,
-                        AST.Type.CharArray => Type.I8Array,
-                        _ => throw new InternalErrorException($"Unknown type {symbol.Type}")
-                    };
-                    v.Guid = Guid.NewGuid();
-                    function.AddAutoVariable(v);     
-                    */
                 }
-                irList.AddRange(GenerateIRForStmt(functionDecl.Body, function));
+                LabelInstruction functionLabel = new();
+                functionLabel.Name = function.Name;
+                function.IRs.Add(functionLabel);
+                var alloc = new AllocateFrameInstrunction();
+                function.IRs.Add(alloc);
+                function.IRs.AddRange(GenerateIRForStmt(functionDecl.Body, function));
+                alloc.FrameSize = function.AutoVariableCount * 4 + 16;
                 module.Functions.Add(function);
             }
-            List<IIR> irs = new();
-            foreach (Function item in irs)
+            foreach (Function item in module.Functions)
             {
-                LabelInstruction functionLabel = new();
-                functionLabel.Name = item.Name;
-                irs.Add(functionLabel);
-                irs.AddRange(item.IRs);
+                module.Instructions.AddRange(item.IRs);
             }
-            return irs;
+            return module;
         }
-        internal static List<IIR> GenerateIRForStmt(IStmt stmt, Function parentFunction)
+
+        internal static List<IInstruction> GenerateIRForStmt(IStmt stmt, Function parentFunction)
         {
-            List<IIR> irList = new();
+            List<IInstruction> irList = new();
             switch (stmt)
             {
                 case ForStmt forStmt:
                     {
-                        foreach (var item in forStmt.Decls)
-                        {
-                            if (item.InitializerExpr is not null)
-                            {
-                                var irs = GenerateIRForExpr(item.InitializerExpr, parentFunction);
-                                irList.AddRange(irs);
-                            }
-                        }
                         irList.AddRange(GenerateIRForExpr(forStmt.InitExpr, parentFunction));
                         irList.Add(forStmt.StartLabel);
                         var cmpIRList = GenerateIRForExpr(forStmt.ConditionalExpr, parentFunction);
@@ -139,8 +121,8 @@ namespace SimpleCCompiler.IR
                         irList.Add(jumpInstruction);
                         irList.AddRange(GenerateIRForStmt(forStmt.LoopBodyStmt, parentFunction));
                         irList.Add(forStmt.EndExprLabel);
-                        irList.Add(new JmpInstruction(forStmt.StartLabel));
                         irList.AddRange(GenerateIRForExpr(forStmt.EndExpr, parentFunction));
+                        irList.Add(new JmpInstruction(forStmt.StartLabel));
                         irList.Add(forStmt.EndLabel);
                         break;
                     }
@@ -160,9 +142,11 @@ namespace SimpleCCompiler.IR
                             _ => throw new NotImplementedException($"{cmpIR.BinaryOperator} not implemented"),
                         };
                         irList.Add(jumpInstruction);
-                        irList.Add(ifStmt.IfTrueLabel);
-                        irList.AddRange(GenerateIRForStmt(ifStmt.BodyStmt, parentFunction));
+                        irList.AddRange(GenerateIRForStmt(ifStmt.IfTrueBody, parentFunction));
+                        irList.Add(new JmpInstruction(ifStmt.IfEndLabel));
                         irList.Add(ifStmt.IfFalseLabel);
+                        irList.AddRange(GenerateIRForStmt(ifStmt.IfFalseBody, parentFunction));
+                        irList.Add(ifStmt.IfEndLabel);
                         break;
                     }
                 case EmptyStmt e:
@@ -198,9 +182,9 @@ namespace SimpleCCompiler.IR
             }
             return irList;
         }
-        internal static List<IIR> GenerateIRForExpr(IExpr expr, Function parentFunction)
+        internal static List<IInstruction> GenerateIRForExpr(IExpr expr, Function parentFunction)
         {
-            List<IIR> irList = new();
+            List<IInstruction> irList = new();
             if (expr.ResultVariable is not null)
             {
                 return irList;
@@ -261,7 +245,6 @@ namespace SimpleCCompiler.IR
                                             {
                                                 // left
                                                 Variable resultTempVar = parentFunction.AllocateTempVariable(Type.I32);
-                                                Console.WriteLine(decl);
                                                 var lvalue = parentFunction.IRSymbolTable.VariableDictionary[decl.Ref.Guid];
                                                 AssignmentInstruction assignment = new(lvalue, right.ResultVariable, resultTempVar);
                                                 irList.Add(assignment);
@@ -285,7 +268,7 @@ namespace SimpleCCompiler.IR
                                                 }
                                                 else
                                                 {
-                                                    throw new SemanticErrorException("Array DeclRefExpr expected");
+                                                    throw new SemanticErrorException($"Unexpected {arraySubscript.ArrayRefExpr}, Array DeclRefExpr expected");
                                                 }
                                             }
                                             break;
@@ -313,7 +296,8 @@ namespace SimpleCCompiler.IR
                                         var list = GenerateIRForExpr(right, parentFunction);
                                         irList.AddRange(list);
                                     }
-                                    Variable resultTempVar = parentFunction.AllocateTempVariable(IR.Type.I32);
+                                    // Variable resultTempVar = parentFunction.AllocateTempVariable(IR.Type.I32);
+                                    Variable resultTempVar = null;
                                     CmpInstruction instruction = new(left.ResultVariable, right.ResultVariable,
                                         resultTempVar, binaryOperatorExpr.Operator);
                                     binaryOperatorExpr.ResultVariable = resultTempVar;
@@ -416,8 +400,9 @@ namespace SimpleCCompiler.IR
                         if (arraySubscript.ArrayRefExpr is DeclRefExpr arrayRef && arrayRef.Ref.Type is AST.Type.IntArray)
                         {
                             Variable resultTempVar = parentFunction.AllocateTempVariable(Type.I32);
-                            var lvalue = parentFunction.IRSymbolTable.VariableDictionary[arrayRef.Ref.Guid];
-                            LoadArrayInstruction instruction = new(arraySubscript.SubscriptExpr.ResultVariable, resultTempVar);
+                            var arrayVar = parentFunction.IRSymbolTable.VariableDictionary[arrayRef.Ref.Guid] as ArrayVariable;
+                            ArrayIndexVariable arrayIndexVariable = new(arrayVar, arraySubscript.SubscriptExpr.ResultVariable);
+                            LoadArrayInstruction instruction = new(arrayIndexVariable, resultTempVar);
                             arraySubscript.ResultVariable = resultTempVar;
                             irList.Add(instruction);
                         }

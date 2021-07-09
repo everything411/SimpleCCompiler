@@ -31,6 +31,18 @@ namespace SimpleCCompiler.AST.Stmt
         {
             switch (decl)
             {
+                case ArrayVarDecl arrayVarDecl:
+                    if (arrayVarDecl.Parent is null)
+                    {
+                        arrayVarDecl.Parent = this;
+                    }
+                    else if (arrayVarDecl.Parent != this)
+                    {
+                        throw new InternalErrorException("Different parent detacted");
+                    }
+                    Decls.Add(arrayVarDecl);
+                    SymbolTable.AddArrayOrException(arrayVarDecl.Name, arrayVarDecl.Type, arrayVarDecl.Size);
+                    break;
                 case VarDecl varDecl:
                     if (varDecl.Parent is null)
                     {

@@ -17,15 +17,7 @@ namespace SimpleCCompiler.IR
         public int OffsetEBP { get; set; }
         public override string ToString()
         {
-            if (OffsetEBP > 0)
-            {
-                return $" dword ptr [ebp + {OffsetEBP}] ";
-            }
-            else
-            {
-                return $" dword ptr [ebp {OffsetEBP}] ";
-            }
-            
+            return $"{Type} {Name}";
         }
     }
     public class ArrayIndexVariable : Variable
@@ -35,27 +27,19 @@ namespace SimpleCCompiler.IR
         {
             Guid = Guid.NewGuid();
             Name = "A_" + Guid.ToString("N").Substring(0, 8);
-            Type = Type switch
+            Type = arrayVariable.Type switch
             {
                 Type.I32Array => Type.I32,
                 Type.I8Array => Type.I8,
-                _ => throw new Exception("")
+                _ => throw new Exception($"What array {arrayVariable.Type}?")
             };
             OffsetEBP = arrayVariable.OffsetEBP;
             Index = index;
-        }
-        public override string ToString()
-        {
-            return base.ToString();
         }
     }
     public class ArrayVariable : Variable
     {
         public int Size { get; set; }
-        public override string ToString()
-        {
-            return base.ToString();
-        }
     }
 
     public class IRStringLiteral
