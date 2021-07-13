@@ -114,7 +114,7 @@ namespace SimpleCCompiler.IR.Instrunction
             StringBuilder stringBuilder = new();
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"cdq");
-            stringBuilder.AppendLine($"div word ptr [ebp + {Argument2.OffsetEBP}]");
+            stringBuilder.AppendLine($"idiv dword ptr [ebp + {Argument2.OffsetEBP}]");
             stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
             return stringBuilder.ToString();
         }
@@ -135,7 +135,7 @@ namespace SimpleCCompiler.IR.Instrunction
             StringBuilder stringBuilder = new();
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"cdq");
-            stringBuilder.AppendLine($"div word ptr [ebp + {Argument2.OffsetEBP}]");
+            stringBuilder.AppendLine($"idiv dword ptr [ebp + {Argument2.OffsetEBP}]");
             stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], edx");
             return stringBuilder.ToString();
         }

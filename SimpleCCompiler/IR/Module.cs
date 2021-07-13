@@ -20,7 +20,7 @@ namespace SimpleCCompiler.IR
             StringBuilder stringBuilder = new();
             foreach (var item in Instructions)
             {
-                stringBuilder.Append(item.ToString());
+                stringBuilder.AppendLine(item.ToString());
             }
             File.WriteAllText(filename, stringBuilder.ToString());
         }

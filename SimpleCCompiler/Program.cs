@@ -15,7 +15,7 @@ namespace SimpleCCompiler
     {
         static void Main(string[] args)
         {
-            if (args.Length != 1)
+            if (args.Length == 0)
             {
                 Console.WriteLine("usage: naivecc file");
                 return;
