@@ -17,16 +17,17 @@ namespace SimpleCCompiler.IR.Instrunction
             Arguments = args;
             Result = result;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             for (int i = Arguments.Count - 1; i >= 0; i--)
             {
                 stringBuilder.AppendLine($"push [ebp + {Arguments[i].OffsetEBP}]");
             } 
             stringBuilder.AppendLine($"call {FunctionName}");
             stringBuilder.AppendLine($"add esp, {Arguments.Count * 4}");
-            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            stringBuilder.Append($"mov [ebp + {Result.OffsetEBP}], eax");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -43,13 +44,14 @@ namespace SimpleCCompiler.IR.Instrunction
             Operation = Operation.Return;
             Argument1 = arg;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"mov esp, ebp");
             stringBuilder.AppendLine($"pop ebp");
-            stringBuilder.AppendLine("ret");
+            stringBuilder.Append("ret");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -60,12 +62,13 @@ namespace SimpleCCompiler.IR.Instrunction
     public class AllocateFrameInstrunction : Instruction
     {
         public int FrameSize { get; set; }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine("push ebp");
             stringBuilder.AppendLine("mov ebp, esp");
-            stringBuilder.AppendLine($"sub esp, {FrameSize}");
+            stringBuilder.Append($"sub esp, {FrameSize}");
             return stringBuilder.ToString();
         }
         public override string ToString()

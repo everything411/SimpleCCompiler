@@ -1,12 +1,8 @@
-﻿using SimpleCCompiler.AST.Decl;
+﻿using SimpleCCompiler.IR;
 using SimpleCCompiler.IR.Instrunction;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SimpleCCompiler.AST.Stmt
+namespace SimpleCCompiler.AST
 {
     public class CompoundStmt : Stmt
     {
@@ -14,7 +10,7 @@ namespace SimpleCCompiler.AST.Stmt
         public List<VarDecl> Decls { get; set; } = new();
         // TODO: hack
         // public List<object> Stmts { get; set; } = new();
-        public List<IStmt> Stmts { get; set; } = new();
+        public List<Stmt> Stmts { get; set; } = new();
         public override SymbolTableItem LookupSymbolTable(string name)
         {
             SymbolTableItem item;
@@ -27,7 +23,7 @@ namespace SimpleCCompiler.AST.Stmt
                 return Parent.LookupSymbolTable(name);
             }
         }
-        public override void AddDeclaration(IDecl decl)
+        public override void AddDeclaration(Decl decl)
         {
             switch (decl)
             {
@@ -59,7 +55,7 @@ namespace SimpleCCompiler.AST.Stmt
                     throw new SemanticErrorException($"Unexpected token {decl}, expected VarDecl");
             }
         }
-        public override IEnumerable<SymbolTableItem> CollectSymbolTableItems()
+        public override IList<SymbolTableItem> CollectSymbolTableItems()
         {
             List<SymbolTableItem> symbolTableItems = new();
             symbolTableItems.AddRange(SymbolTable.Symbols.Values);
@@ -68,6 +64,15 @@ namespace SimpleCCompiler.AST.Stmt
                 symbolTableItems.AddRange(stmt.CollectSymbolTableItems());
             }
             return symbolTableItems;
+        }
+        public override IList<Instruction> GenerateIR(Function parentFunction)
+        {
+            List<Instruction> irList = new();
+            foreach (var item in Stmts)
+            {
+                irList.AddRange(item.GenerateIR(parentFunction));
+            }
+            return irList;
         }
     }
 }

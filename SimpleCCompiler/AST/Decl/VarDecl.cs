@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace SimpleCCompiler.AST.Decl
+namespace SimpleCCompiler.AST
 {
     public class VarDecl : ValueDecl
     {
-        public IExpr InitializerExpr { get; set; }
+        public Expr InitializerExpr { get; set; }
         public override SymbolTableItem LookupSymbolTable(string name)
         {
             return Parent.LookupSymbolTable(name);

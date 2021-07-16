@@ -16,14 +16,15 @@ namespace SimpleCCompiler.IR.Instrunction
             Result = result;
             Argument1 = arg1;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             var arrayIndexVar = Argument1 as ArrayIndexVariable;
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov ecx, [ebp + {arrayIndexVar.Index.OffsetEBP}]");
             stringBuilder.AppendLine($"lea eax, [ebp + {arrayIndexVar.OffsetEBP} + ecx * 4]");
             stringBuilder.AppendLine($"mov ecx, [eax]");
-            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], ecx");
+            stringBuilder.Append($"mov [ebp + {Result.OffsetEBP}], ecx");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -39,9 +40,9 @@ namespace SimpleCCompiler.IR.Instrunction
             Result = result;
             Literal = s;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return $"mov dword ptr [ebp + {Result.OffsetEBP}], offset {Literal.LiteralName}";
+            return $";{ToString()}\nmov dword ptr [ebp + {Result.OffsetEBP}], offset {Literal.LiteralName}";
         }
         public override string ToString()
         {
@@ -56,9 +57,9 @@ namespace SimpleCCompiler.IR.Instrunction
             Result = result;
             Literal = s;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return $"mov dword ptr [ebp + {Result.OffsetEBP}], {Literal}";
+            return $";{ToString()}\nmov dword ptr [ebp + {Result.OffsetEBP}], {Literal}";
         }
         public override string ToString()
         {

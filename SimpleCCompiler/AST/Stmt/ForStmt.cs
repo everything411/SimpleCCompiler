@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SimpleCCompiler.AST.Decl;
-using SimpleCCompiler.AST.Expr;
+﻿using SimpleCCompiler.IR;
 using SimpleCCompiler.IR.Instrunction;
+using System;
+using System.Collections.Generic;
 
-namespace SimpleCCompiler.AST.Stmt
+namespace SimpleCCompiler.AST
 {
     public class ForStmt : Stmt
     {
         public List<VarDecl> Decls { get; set; } = new();
-        public IExpr InitExpr { get; set; }
-        public IExpr ConditionalExpr { get; set; } 
-        public IExpr EndExpr { get; set; }
-        public IStmt LoopBodyStmt { get; set; }
+        public Expr InitExpr { get; set; }
+        public Expr ConditionalExpr { get; set; } 
+        public Expr EndExpr { get; set; }
+        public Stmt LoopBodyStmt { get; set; }
         public SymbolTable SymbolTable { get; set; } = new();
         // for IR generation
         public LabelInstruction StartLabel { get; set; } = new();
@@ -32,7 +28,7 @@ namespace SimpleCCompiler.AST.Stmt
                 return Parent.LookupSymbolTable(name);
             }
         }
-        public override void AddDeclaration(IDecl decl)
+        public override void AddDeclaration(Decl decl)
         {
             switch (decl)
             {
@@ -52,7 +48,7 @@ namespace SimpleCCompiler.AST.Stmt
                     throw new SemanticErrorException($"Unexpected token {decl}, expected VarDecl");
             }
         }
-        public override IEnumerable<SymbolTableItem> CollectSymbolTableItems()
+        public override IList<SymbolTableItem> CollectSymbolTableItems()
         {
             List<SymbolTableItem> symbolTableItems = new();
             symbolTableItems.AddRange(SymbolTable.Symbols.Values);
@@ -61,6 +57,32 @@ namespace SimpleCCompiler.AST.Stmt
                 symbolTableItems.AddRange(LoopBodyStmt.CollectSymbolTableItems());
             }
             return symbolTableItems;
+        }
+        public override IList<Instruction> GenerateIR(Function parentFunction)
+        {
+            List<Instruction> irList = new();
+            irList.AddRange(InitExpr.GenerateIR(parentFunction));
+            irList.Add(StartLabel);
+            var cmpIRList = ConditionalExpr.GenerateIR(parentFunction);
+            irList.AddRange(cmpIRList);
+            var cmpIR = irList[^1] as CmpInstruction;
+            Instruction jumpInstruction = cmpIR.BinaryOperator switch
+            {
+                BinaryOperator.Less => new JgeInstruction(EndLabel),
+                BinaryOperator.Greater => new JlInstruction(EndLabel),
+                BinaryOperator.LessEqual => new JgInstruction(EndLabel),
+                BinaryOperator.GreaterEqual => new JlInstruction(EndLabel),
+                BinaryOperator.Equal => new JneInstruction(EndLabel),
+                BinaryOperator.NotEqual => new JeInstruction(EndLabel),
+                _ => throw new NotImplementedException($"{cmpIR.BinaryOperator} not implemented"),
+            };
+            irList.Add(jumpInstruction);
+            irList.AddRange(LoopBodyStmt.GenerateIR(parentFunction));
+            irList.Add(EndExprLabel);
+            irList.AddRange(EndExpr.GenerateIR(parentFunction));
+            irList.Add(new JmpInstruction(StartLabel));
+            irList.Add(EndLabel);
+            return irList;
         }
     }
 }

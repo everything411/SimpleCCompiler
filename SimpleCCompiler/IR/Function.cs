@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 namespace SimpleCCompiler.IR
 {
-    public class Function : IIR
+    public class Function
     {
         // private int 
         public string Name { get; set; }
-        public IR.Type Type { get; set; }
+        public Type Type { get; set; }
         public IRSymbolTable IRSymbolTable { get; set; } = new();
         public int AutoVariableCount { get; set; } = 0;
-        public List<IInstruction> IRs { get; set; } = new();
+        public List<Instruction> IRs { get; set; } = new();
         public List<ReturnInstrunction> ReturnInstrunctions { get; set; } = new();
         public List<IRStringLiteral> StringLiterals { get; set; } = new();
         public void AddAutoVariable(Variable v)
@@ -26,7 +26,7 @@ namespace SimpleCCompiler.IR
             v.OffsetEBP = - (AutoVariableCount + 1) * 4;
             IRSymbolTable.VariableDictionary.Add(v.Guid, v);
         }
-        public Variable AllocateTempVariable(IR.Type type)
+        public Variable AllocateTempVariable(Type type)
         {
             Variable v = new();
             v.Guid = Guid.NewGuid();

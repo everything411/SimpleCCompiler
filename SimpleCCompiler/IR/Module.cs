@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace SimpleCCompiler.IR
 {
-    public class Module : IIR
+    public class Module
     {
         public List<Variable> GlobalVariables { get; set; }
         public List<Function> Functions { get; set; } = new();
         // public List<IRStringLiteral> StringLiterals { get; set; } = new();
         public IRSymbolTable IRSymbolTable { get; set; }
-        public List<IInstruction> Instructions { get; set; } = new();
+        public List<Instruction> Instructions { get; set; } = new();
         public void GenerateIRFile(string filename)
         {
             StringBuilder stringBuilder = new();

@@ -69,7 +69,7 @@ namespace SimpleCCompiler
             Module module = null;
             try
             {
-                module = IRGenerator.GenerateIRForTranslationUnit(astRoot);
+                module = astRoot.GenerateModule();
             }
             catch (Exception e)
             {

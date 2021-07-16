@@ -1,9 +1,5 @@
-﻿using SimpleCCompiler.AST.Expr;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using SimpleCCompiler.AST;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SimpleCCompiler.IR.Instrunction
 {
@@ -24,13 +20,14 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Add;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"mov ecx, [ebp + {Argument2.OffsetEBP}]");
             stringBuilder.AppendLine($"add eax, ecx");
-            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            stringBuilder.Append($"mov [ebp + {Result.OffsetEBP}], eax");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -45,13 +42,14 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Sub;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"mov ecx, [ebp + {Argument2.OffsetEBP}]");
             stringBuilder.AppendLine($"sub eax, ecx");
-            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            stringBuilder.Append($"mov [ebp + {Result.OffsetEBP}], eax");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -68,12 +66,13 @@ namespace SimpleCCompiler.IR.Instrunction
             BinaryOperator = o;
             Operation = Operation.Cmp;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"mov ecx, [ebp + {Argument2.OffsetEBP}]");
-            stringBuilder.AppendLine($"cmp eax, ecx");
+            stringBuilder.Append($"cmp eax, ecx");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -88,13 +87,14 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Mul;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"mov ecx, [ebp + {Argument2.OffsetEBP}]");
             stringBuilder.AppendLine($"imul eax, ecx");
-            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            stringBuilder.Append($"mov [ebp + {Result.OffsetEBP}], eax");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -109,13 +109,14 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Div;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"cdq");
             stringBuilder.AppendLine($"idiv dword ptr [ebp + {Argument2.OffsetEBP}]");
-            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            stringBuilder.Append($"mov [ebp + {Result.OffsetEBP}], eax");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -130,13 +131,14 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Mod;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"cdq");
             stringBuilder.AppendLine($"idiv dword ptr [ebp + {Argument2.OffsetEBP}]");
-            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], edx");
+            stringBuilder.Append($"mov [ebp + {Result.OffsetEBP}], edx");
             return stringBuilder.ToString();
         }
         public override string ToString()

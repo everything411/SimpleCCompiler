@@ -2,23 +2,9 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace SimpleCCompiler.AST.Decl
+namespace SimpleCCompiler.AST
 {
-    public class Decl : IDecl
+    public class Decl : Node
     {
-        [JsonIgnore]
-        public INode Parent { get; set; }
-        public virtual SymbolTableItem LookupSymbolTable(string name)
-        {
-            throw new NotImplementedException();
-        }
-        public virtual void AddDeclaration(IDecl decl)
-        {
-            throw new NotImplementedException();
-        }
-        public virtual IEnumerable<SymbolTableItem> CollectSymbolTableItems()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

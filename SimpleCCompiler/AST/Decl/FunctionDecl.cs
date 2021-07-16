@@ -1,10 +1,6 @@
-﻿using SimpleCCompiler.AST.Stmt;
-using SimpleCCompiler.IR;
-using SimpleCCompiler.IR.Instrunction;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SimpleCCompiler.AST.Decl
+namespace SimpleCCompiler.AST
 {
     public class FunctionDecl : ValueDecl
     {
@@ -23,7 +19,7 @@ namespace SimpleCCompiler.AST.Decl
                 return Parent.LookupSymbolTable(name);
             }
         }
-        public override void AddDeclaration(IDecl decl)
+        public override void AddDeclaration(Decl decl)
         {
             switch (decl)
             {
@@ -43,6 +39,11 @@ namespace SimpleCCompiler.AST.Decl
                     throw new SemanticErrorException($"Unexpected token {decl}, expected ParmVarDecl");
             }
         }
-
+        public List<SymbolTableItem> CollectSymbolsFromFunction()
+        {
+            List<SymbolTableItem> symbolTableItems = new();
+            symbolTableItems.AddRange(Body.CollectSymbolTableItems());
+            return symbolTableItems;
+        }
     }
 }

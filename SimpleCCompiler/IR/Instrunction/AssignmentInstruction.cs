@@ -15,12 +15,13 @@ namespace SimpleCCompiler.IR.Instrunction
             Argument2 = argument2;
             Result = result;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument2.OffsetEBP}]");
             stringBuilder.AppendLine($"mov [ebp + {Argument1.OffsetEBP}], eax");
-            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
+            stringBuilder.Append($"mov [ebp + {Result.OffsetEBP}], eax");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -34,15 +35,16 @@ namespace SimpleCCompiler.IR.Instrunction
             : base(argument1, argument2, result)
         {
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             var arrayIndexVar = Argument1 as ArrayIndexVariable;
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov ecx, [ebp + {arrayIndexVar.Index.OffsetEBP}]");
             stringBuilder.AppendLine($"lea eax, [ebp + {arrayIndexVar.OffsetEBP} + ecx * 4]");
             stringBuilder.AppendLine($"mov edx, [ebp + {Argument2.OffsetEBP}]");
             stringBuilder.AppendLine($"mov [eax], edx");
-            stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], edx");
+            stringBuilder.Append($"mov [ebp + {Result.OffsetEBP}], edx");
             return stringBuilder.ToString();
         }
         public override string ToString()

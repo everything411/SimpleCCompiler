@@ -9,9 +9,9 @@ namespace SimpleCCompiler.IR.Instrunction
     public class LabelInstruction : Instruction
     {
         public string Name { get; set; } = "L_" + Guid.NewGuid().ToString("N").Substring(0, 8);
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return Name + ":";
+            return $";{ToString()}\n{Name}:";
         }
         public override string ToString()
         {

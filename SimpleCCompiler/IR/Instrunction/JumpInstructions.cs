@@ -16,56 +16,24 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Jmp;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return $"jmp {Label.Name}";
+            return $";{ToString()}\njmp {Label.Name}";
         }
         public override string ToString()
         {
             return $"(JmpInstruction, {Label.Name}, , )";
         }
     }
-    /*
-    public class JzInstruction : JumpInstruction
-    {
-        public JzInstruction(LabelInstruction label) : base(label)
-        {
-            Operation = Operation.Jz;
-        }
-        public override string EmitAssembly()
-        {
-            return $"jz {Label.Name}";
-        }
-        public override string ToString()
-        {
-            return $"(JzInstruction, {Label.Name}, , )";
-        }
-    }
-    public class JnzInstruction : JumpInstruction
-    {
-        public JnzInstruction(LabelInstruction label) : base(label)
-        {
-            Operation = Operation.Jnz;
-        }
-        public override string EmitAssembly()
-        {
-            return $"jnz {Label.Name}";
-        }
-        public override string ToString()
-        {
-            return $"(JnzInstruction, {Label.Name}, , )";
-        }
-    }
-    */
     public class JgInstruction : JumpInstruction
     {
         public JgInstruction(LabelInstruction label) : base(label)
         {
             Operation = Operation.Jg;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return $"jg {Label.Name}";
+            return $";{ToString()}\njg {Label.Name}";
         }
         public override string ToString()
         {
@@ -78,9 +46,9 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Jl;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return $"jl {Label.Name}";
+            return $";{ToString()}\njl {Label.Name}";
         }
         public override string ToString()
         {
@@ -93,9 +61,9 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Jge;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return $"jge {Label.Name}";
+            return $";{ToString()}\njge {Label.Name}";
         }
         public override string ToString()
         {
@@ -108,9 +76,9 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Jle;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return $"jle {Label.Name}";
+            return $";{ToString()}\njle {Label.Name}";
         }
         public override string ToString()
         {
@@ -123,9 +91,9 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Je;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return $"je {Label.Name}";
+            return $";{ToString()}\nje {Label.Name}";
         }
         public override string ToString()
         {
@@ -138,9 +106,9 @@ namespace SimpleCCompiler.IR.Instrunction
         {
             Operation = Operation.Jne;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
-            return $"jne {Label.Name}";
+            return $";{ToString()}\njne {Label.Name}";
         }
         public override string ToString()
         {

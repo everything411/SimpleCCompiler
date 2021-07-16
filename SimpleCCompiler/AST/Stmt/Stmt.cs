@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SimpleCCompiler.AST.Stmt
+namespace SimpleCCompiler.AST
 {
-    public class Stmt : IStmt
+    public class Stmt : Node
     {
-        public INode Parent{ get; set; }
-
         public ForStmt GetIterationStmtOrException()
         {
-            // Console.WriteLine($"this is {this}, Parent is {Parent}");
             if (this is ForStmt)
             {
                 return this as ForStmt;
@@ -23,20 +20,10 @@ namespace SimpleCCompiler.AST.Stmt
                 throw new SemanticErrorException($"Unexpected 'break' in {this}, not in Iteration");
             }
         }
-
-        public virtual SymbolTableItem LookupSymbolTable(string name)
+        public override IList<SymbolTableItem> CollectSymbolTableItems()
         {
-            throw new NotImplementedException();
-        }
-
-        public virtual void AddDeclaration(IDecl decl)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual IEnumerable<SymbolTableItem> CollectSymbolTableItems()
-        {
-            return new List<SymbolTableItem>(0);
+            List<SymbolTableItem> symbolTableItems = new(0);
+            return symbolTableItems;
         }
     }
 }

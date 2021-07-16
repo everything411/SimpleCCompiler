@@ -1,8 +1,5 @@
 ﻿using Antlr4.Runtime.Misc;
 using SimpleCCompiler.AST;
-using SimpleCCompiler.AST.Decl;
-using SimpleCCompiler.AST.Expr;
-using SimpleCCompiler.AST.Stmt;
 using System;
 using System.Collections.Generic;
 
@@ -24,8 +21,8 @@ namespace SimpleCCompiler.Parser
     public class SimpleCASTListener : CBaseListener
     {
         TranslationUnitDecl translationUnitDecl;
-        public Stack<INode> NodeStack { get; }
-        public Stack<INode> GetNodeStackDebug()
+        public Stack<Node> NodeStack { get; }
+        public Stack<Node> GetNodeStackDebug()
         {
             return NodeStack;
         }
@@ -37,7 +34,7 @@ namespace SimpleCCompiler.Parser
         public SimpleCASTListener() : base()
         {
             translationUnitDecl = new TranslationUnitDecl();
-            NodeStack = new Stack<INode>();
+            NodeStack = new Stack<Node>();
         }
 
 
@@ -909,11 +906,11 @@ namespace SimpleCCompiler.Parser
         {
             base.ExitPrimaryExpression(context);
         }
-        internal static void AddStatementToParent(INode parent, IStmt child)
+        internal static void AddStatementToParent(Node parent, Stmt child)
         {
 
         }
-        internal static void AddExpressionToParent(INode parent, IExpr child)
+        internal static void AddExpressionToParent(Node parent, Expr child)
         {
             switch (parent)
             {

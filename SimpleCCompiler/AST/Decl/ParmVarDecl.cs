@@ -1,4 +1,4 @@
-﻿namespace SimpleCCompiler.AST.Decl
+﻿namespace SimpleCCompiler.AST
 {
     public class ParmVarDecl : VarDecl
     {

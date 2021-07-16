@@ -14,12 +14,13 @@ namespace SimpleCCompiler.IR.Instrunction
             Argument1 = argument1;
             Result = result;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
-            stringBuilder.AppendLine($"inc dword ptr [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.Append($"inc dword ptr [ebp + {Argument1.OffsetEBP}]");
             return stringBuilder.ToString();
         }
         public override string ToString()
@@ -35,12 +36,13 @@ namespace SimpleCCompiler.IR.Instrunction
             Argument1 = argument1;
             Result = result;
         }
-        public override string EmitAssembly()
+        public override string GenerateAssembly()
         {
             StringBuilder stringBuilder = new();
+            stringBuilder.AppendLine($";{ToString()}");
             stringBuilder.AppendLine($"mov eax, [ebp + {Argument1.OffsetEBP}]");
             stringBuilder.AppendLine($"mov [ebp + {Result.OffsetEBP}], eax");
-            stringBuilder.AppendLine($"dec dword ptr [ebp + {Argument1.OffsetEBP}]");
+            stringBuilder.Append($"dec dword ptr [ebp + {Argument1.OffsetEBP}]");
             return stringBuilder.ToString();
         }
         public override string ToString()
